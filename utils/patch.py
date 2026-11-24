@@ -216,10 +216,30 @@ def main() -> None:
 
     blob = payload if not args.loader else loader
 
+    # When a loader is used, kaeru is stored in its own sub-partition so the
+    # first stage can load it without corrupting the LK image. That partition
+    # is appended after LK, so its extended header and payload are part of the
+    # final image. Serialize it before calculating the padding and align its
+    # payload to 16 bytes; otherwise its 8-byte data alignment can leave the
+    # output 8 bytes short of a 16-byte boundary.
+    tail_size = 0
+    if args.loader:
+        tail_size = len(
+            bytes(
+                lk.add_partition(
+                    name='kaeru',
+                    data=payload,
+                    memory_address=0,
+                    use_extended=True,
+                    alignment=16,
+                )
+            )
+        )
+
     # Preloaders that round the image size up before locating a trailer read
     # past it if data_size stops being aligned. Keep the alignment we started
-    # with.
-    padding = -(part.header.data_size + len(blob)) % 16
+    # with, including anything appended after the LK partition.
+    padding = -(part.header.data_size + len(blob) + tail_size) % 16
     if padding:
         print('Padding payload by %d byte(s)' % padding)
         blob += b'\x00' * padding
@@ -251,17 +271,6 @@ def main() -> None:
     else:
         data[image_size:image_size] = blob
     part.data = bytes(data)
-
-    if args.loader:
-        # If the user specified a loader, this means kaeru has to be
-        # stored in a separate sub-partition, so the first stage can
-        # easily load it from storage without corrupting anything.
-        lk.add_partition(
-            name='kaeru',
-            data=payload,
-            memory_address=0,
-            use_extended=True,
-        )
 
     print('Payload destination: 0x%X' % payload_dest)
 

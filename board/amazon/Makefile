@@ -13,3 +13,4 @@ lib-$(CONFIG_AMAZON_ROOK) += amazon/board-rook.o
 lib-$(CONFIG_AMAZON_SUNSTONE) += amazon/board-sunstone.o
 lib-$(CONFIG_AMAZON_AUSTIN) += amazon/board-austin.o
 lib-$(CONFIG_AMAZON_FORD) += amazon/board-ford.o
+lib-$(CONFIG_AMAZON_LIDAR) += amazon/board-lidar.o

@@ -26,6 +26,12 @@ config AMAZON_RADAR
     help
       Say Y if you want to include support for Echo 2nd Gen (2017)
 
+config AMAZON_LIDAR
+    bool "Support Echo Plus 2nd Gen (2019)"
+    default n
+    help
+      Say Y if you want to include support for Echo Plus 2nd Gen (2019)
+
 config AMAZON_CROWN
     bool "Support Echo Show 8 1st Gen (2019)"
     select AMAZON_MT8163_COMMON
